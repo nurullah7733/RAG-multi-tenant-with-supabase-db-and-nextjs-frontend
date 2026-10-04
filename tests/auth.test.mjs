@@ -341,6 +341,8 @@ test("proxy verifies users and preserves refreshed cookies on both pass-through 
 
 test("dashboard independently denies unauthenticated requests", async () => {
   const { default: dashboard } = load("app/dashboard/page.tsx", {
+    "@/lib/api/organizations": {},
+    "@/lib/api/client": {},
     "@/lib/supabase/server": {
       createClient: async () => ({
         auth: { getUser: async () => ({ data: { user: null }, error: {} }) },
@@ -349,7 +351,7 @@ test("dashboard independently denies unauthenticated requests", async () => {
     "@/components/auth/logout-button": { LogoutButton: () => null },
     "next/navigation": { redirect },
   });
-  await assert.rejects(dashboard(), /REDIRECT:\/login/);
+  await assert.rejects(dashboard({}), /REDIRECT:\/login/);
 });
 
 test("configuration rejects secret keys and untrusted URL shapes without exposing values", () => {

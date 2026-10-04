@@ -42,3 +42,11 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Organization onboarding (Phase 1.4)
+
+The dashboard now loads memberships through FastAPI and directs new users to
+`/dashboard/onboarding`. Apply the backend onboarding migration before using it.
+See [setup, scope, commands and manual checks](../docs/phase-1.4-onboarding.md).
+The Knowledge Base destination is an authorized entry page; document uploads are
+intentionally deferred to Phase 2.
