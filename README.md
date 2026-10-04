@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Phase 1.2: Supabase authentication
+
+Implemented email/password signup, confirmation, login, logout, cookie sessions,
+server-protected `/dashboard`, and Google/Facebook OAuth with a PKCE callback.
+See [authentication setup and verification](./docs/authentication.md) before running.
+Only Supabase Auth is accessed from Next.js; tenant business operations remain
+the responsibility of FastAPI. No organization model or business tables are added.
+
 ## Getting Started
 
 First, run the development server:

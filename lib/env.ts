@@ -5,8 +5,7 @@
  * would be inlined into the client bundle. Secrets (service-role keys,
  * AI provider keys) must never appear behind this module.
  *
- * Supabase public keys are intentionally absent for now and are
- * introduced with the authentication phase.
+ * Auth configuration is isolated in lib/auth/config.ts.
  */
 
 function readPublicEnv(name: string): string | undefined {
