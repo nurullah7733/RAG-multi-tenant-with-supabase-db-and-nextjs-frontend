@@ -1,14 +1,5 @@
 import { API_BASE_URL } from "../env";
 
-/**
- * Typed HTTP client for the FastAPI backend.
- *
- * Application/business data must always go through this client so that
- * the frontend never talks to tenant business data stores directly.
- * Supabase Auth is the deliberate exception and will be wired
- * separately in the authentication phase.
- */
-
 export class ApiError extends Error {
   readonly status: number;
   readonly error: unknown;
@@ -57,7 +48,7 @@ function extractErrorPayload(body: unknown): {
 
 async function request<T>(
   path: string,
-  options: RequestInit & { retries?: number } = {}
+  options: RequestInit & { retries?: number } = {},
 ): Promise<T> {
   const { retries = 0, ...fetchOptions } = options;
   const REQUEST_TIMEOUT_MS = 10_000;
@@ -79,7 +70,9 @@ async function request<T>(
       });
 
       if (response.ok) {
-        return (await response.json()) as T;
+        if (response.status === 204) return undefined as T;
+        const text = await response.text();
+        return (text ? JSON.parse(text) : undefined) as T;
       }
 
       let body: unknown;
@@ -94,7 +87,7 @@ async function request<T>(
       throw new ApiError(
         message ?? `Request to ${path} failed`,
         response.status,
-        body
+        body,
       );
     } catch (error) {
       if (error instanceof ApiError) {
@@ -104,7 +97,9 @@ async function request<T>(
       lastError = error;
 
       if (attempt < retries) {
-        await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 250 * (attempt + 1)),
+        );
       }
     } finally {
       clearTimeout(timeout);
@@ -116,7 +111,22 @@ async function request<T>(
 
 export const apiClient = {
   post<T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> {
-    return request<T>(path, { ...options, method: "POST", body: JSON.stringify(body), headers: { ...options.headers, "Content-Type": "application/json" } });
+    return request<T>(path, {
+      ...options,
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { ...options.headers, "Content-Type": "application/json" },
+    });
+  },
+  postForm<T>(
+    path: string,
+    body: FormData,
+    options: RequestInit = {},
+  ): Promise<T> {
+    return request<T>(path, { ...options, method: "POST", body });
+  },
+  delete<T = void>(path: string, options: RequestInit = {}): Promise<T> {
+    return request<T>(path, { ...options, method: "DELETE" });
   },
   get<T>(path: string, options: RequestInit = {}): Promise<T> {
     return request<T>(path, { ...options, method: "GET" });

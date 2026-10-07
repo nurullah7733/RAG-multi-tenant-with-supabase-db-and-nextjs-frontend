@@ -1,7 +1,6 @@
 import "server-only";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { apiClient } from "@/lib/api/client";
+import { sessionRequestOptions } from "@/lib/api/session";
 
 export type Organization = {
   id: string;
@@ -15,17 +14,8 @@ export type Organization = {
 export type OrganizationAccess = { organization: Organization; role: "owner" | "admin" | "staff" };
 
 export async function organizationApi(writable = false) {
-  const supabase = await createClient(writable);
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) redirect("/login");
-  const { data: session, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !session.session) redirect("/login");
   // Session token is transport only. FastAPI independently verifies identity.
-  const options = {
-    headers: { Authorization: `Bearer ${session.session.access_token}` },
-    cache: "no-store" as const,
-    redirect: "error" as const,
-  };
+  const options = await sessionRequestOptions(writable);
   return {
     list: (offset = 0) => apiClient.get<OrganizationAccess[]>(`/api/v1/organizations?limit=50&offset=${offset}`, options),
     get: (id: string) => apiClient.get<Organization>(`/api/v1/organizations/${encodeURIComponent(id)}`, options),

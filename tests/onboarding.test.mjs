@@ -93,10 +93,15 @@ test("dashboard routes first-time users to onboarding and fails closed on outage
   }
 });
 test("knowledge entry requires backend membership authorization for modified IDs", async () => {
+  let documentsOrganizations = [];
   const { default: page } = load("app/dashboard/organizations/[organizationId]/knowledge/page.tsx", {
+    "next/link": () => null,
     "next/navigation": { redirect, notFound: () => { throw new Error("NOT_FOUND"); } },
     "@/lib/api/client": { ApiError },
     "@/lib/api/organizations": { organizationApi: async () => ({get: async (id) => { assert.equal(id, "another-tenant"); throw new ApiError(404); }}) },
+    "@/lib/api/documents": { documentsApi: async (id) => { documentsOrganizations.push(id); return {list: async () => []}; } },
+    "@/components/knowledge/document-manager": { DocumentManager: () => null },
   });
   await assert.rejects(page({params: Promise.resolve({organizationId: "another-tenant"})}), /NOT_FOUND/);
+  assert.deepEqual(documentsOrganizations, [], "documents must not be listed for a failed authorization");
 });
