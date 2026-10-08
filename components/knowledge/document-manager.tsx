@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import {
   deleteDocument,
@@ -103,7 +104,15 @@ export function DocumentManager({
       </form>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium">Documents</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium">Documents</h2>
+          <Link
+            href={`/dashboard/organizations/${organizationId}/ai-playground`}
+            className="text-sm underline text-primary"
+          >
+            Test AI Assistant
+          </Link>
+        </div>
         {!documents.length && (
           <p className="text-muted-foreground">
             No documents yet. Upload your first knowledge document above.

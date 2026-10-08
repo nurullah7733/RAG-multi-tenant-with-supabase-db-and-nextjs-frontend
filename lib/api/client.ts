@@ -48,16 +48,15 @@ function extractErrorPayload(body: unknown): {
 
 async function request<T>(
   path: string,
-  options: RequestInit & { retries?: number } = {},
+  options: RequestInit & { retries?: number; timeoutMs?: number } = {},
 ): Promise<T> {
-  const { retries = 0, ...fetchOptions } = options;
-  const REQUEST_TIMEOUT_MS = 10_000;
+  const { retries = 0, timeoutMs = 10_000, ...fetchOptions } = options;
 
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
       const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -110,7 +109,7 @@ async function request<T>(
 }
 
 export const apiClient = {
-  post<T>(path: string, body: unknown, options: RequestInit = {}): Promise<T> {
+  post<T>(path: string, body: unknown, options: RequestInit & { timeoutMs?: number } = {}): Promise<T> {
     return request<T>(path, {
       ...options,
       method: "POST",
